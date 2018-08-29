@@ -2,6 +2,7 @@ package com.noticemedan.echo;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.charset.StandardCharsets;
@@ -12,16 +13,23 @@ public class Echo {
         Echo.run();
     }
 
-    private static void run() {
-        try {
-            DatagramChannel channel = DatagramChannel.open();
-            channel.connect(new InetSocketAddress("127.0.0.1", 7007));
-            ByteBuffer buffer = ByteBuffer.allocate(1000);
-            buffer.clear();
-            channel.receive(buffer);
-            System.out.println(String.format("Received: %s", new String(buffer.array(), StandardCharsets.UTF_8)));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+	private static void run() {
+		try {
+			DatagramChannel reader = DatagramChannel.open();
+			reader.bind(new InetSocketAddress("0.0.0.0", 7007));
+			ByteBuffer buffer = ByteBuffer.allocate(4096);
+			while (true) {
+				SocketAddress address = reader.receive(buffer);
+				DatagramChannel write = reader.connect(address);
+				buffer.flip();
+				System.out.println("Received message: " + StandardCharsets.UTF_8.decode(buffer));
+				buffer.rewind();
+				write.write(buffer);
+				write.disconnect();
+				buffer.clear();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }

@@ -2,6 +2,7 @@ package com.noticemedan.echo;
 
 import java.net.*;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 public class UDPClient {
@@ -23,11 +24,9 @@ public class UDPClient {
                 byte[] buffer = new byte[1000];
                 DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
                 aSocket.receive(reply);
-                System.out.println("Reply: " + new String(reply.getData()));
+                System.out.println("Reply: " + new String(reply.getData(), StandardCharsets.UTF_8));
             } catch (SocketException e) {
                 System.out.println("Socket: " + e.getMessage());
-            } catch (UnknownHostException e) {
-                System.out.println("IO: " + e.getMessage());
             } catch (IOException e) {
                 System.out.println("IO: " + e.getMessage());
             } finally {
